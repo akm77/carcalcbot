@@ -69,10 +69,9 @@ async def on_enter_power(message: Message, message_input: MessageInput,
     ctx = manager.current_context()
     try:
         engine_power = check_digit_value(message.text, type_factory=int)
-        ctx.dialog_data.update(engine_volume=engine_power)
+        ctx.dialog_data.update(engine_power=engine_power)
     except ValueError:
         message_text = f"Ошибка ввода {message.text}, необходимо целое число\n"
         await message.answer(message_text)
         return
-    ctx.dialog_data.update(engine_power=check_digit_value(message.text, type_factory=int))
     await manager.switch_to(states.CalculatorStates.enter_data)
