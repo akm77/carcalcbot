@@ -258,10 +258,10 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
     if buyer_type_code == "private":
         price, customs_clearance_cost, disposal_cost, customs_duty = \
             await cost_calculation_for_private(config=config, db_session=db_session, data=data)
-        message_text = f"""Цена: {price["EUR"].quote_currency_value} {price["EUR"].quote_currency}
-Таможенный сбор: {customs_clearance_cost["EUR"].quote_currency_value} {customs_clearance_cost["EUR"].quote_currency}
-Утилизационный сбор: {disposal_cost["EUR"].quote_currency_value} {disposal_cost["EUR"].quote_currency} 
-Пошлина: {customs_duty["EUR"].quote_currency_value} {customs_duty["EUR"].quote_currency} 
+        message_text = f"""Цена: <b>{price["EUR"].quote_currency_value}</b> {price["EUR"].quote_currency}
+Таможенный сбор: <b>{customs_clearance_cost["EUR"].quote_currency_value}</b> {customs_clearance_cost["EUR"].quote_currency}
+Утилизационный сбор: <b>{disposal_cost["EUR"].quote_currency_value}</b> {disposal_cost["EUR"].quote_currency} 
+Пошлина: <b>{customs_duty["EUR"].quote_currency_value}</b> {customs_duty["EUR"].quote_currency} 
 {"="*40}
 """
     else:
@@ -270,12 +270,12 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
         vat = (price["EUR"].quote_currency_value +
                excise_cost["EUR"].quote_currency_value +
                customs_duty["EUR"].quote_currency_value) * config.vat / 100
-        message_text = f"""Цена: {price["EUR"].quote_currency_value} {price["EUR"].quote_currency}
-Таможенный сбор: {customs_clearance_cost["EUR"].quote_currency_value} {customs_clearance_cost["EUR"].quote_currency}
-Утилизационный сбор: {disposal_cost["EUR"].quote_currency_value} {disposal_cost["EUR"].quote_currency} 
-Акциз: {excise_cost["EUR"].quote_currency_value} {excise_cost["EUR"].quote_currency} 
-НДС: {vat} {excise_cost["EUR"].quote_currency}
-Пошлина: {customs_duty["EUR"].quote_currency_value} {customs_duty["EUR"].quote_currency} 
+        message_text = f"""Цена: <b>{price["EUR"].quote_currency_value}</b> {price["EUR"].quote_currency}
+Таможенный сбор: <b>{customs_clearance_cost["EUR"].quote_currency_value}</b> {customs_clearance_cost["EUR"].quote_currency}
+Утилизационный сбор: <b>{disposal_cost["EUR"].quote_currency_value}</b> {disposal_cost["EUR"].quote_currency} 
+Акциз: <b>{excise_cost["EUR"].quote_currency_value}</b> {excise_cost["EUR"].quote_currency} 
+НДС: <b>{vat} {excise_cost["EUR"].quote_currency}</b>
+Пошлина: <b>{customs_duty["EUR"].quote_currency_value}</b> {customs_duty["EUR"].quote_currency} 
 {"="*40}
 """
     return message_text
