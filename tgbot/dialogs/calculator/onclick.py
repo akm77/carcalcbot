@@ -1,17 +1,19 @@
 import logging
 
 from aiogram.types import CallbackQuery
-from aiogram_dialog import DialogManager
+from aiogram_dialog import DialogManager, ShowMode
 from aiogram_dialog.widgets.kbd import Button
-from fake_useragent import UserAgent
 
-from tgbot.services.url_reader import UrlReader, UrlReaderMode
+from tgbot.config import Settings
+from tgbot.utils.calculation import cost_calculation
 
 logger = logging.getLogger(__name__)
 
 
 async def on_click_calculate(callback: CallbackQuery, button: Button, manager: DialogManager):
-    ctx = manager.current_context()
-    dialog_data = ctx.dialog_data
-    message_text = "Калькуляция"
+    manager.show_mode = ShowMode.SEND
+    dialog_data = manager.current_context().dialog_data
+    config: Settings = manager.middleware_data.get("config")
+    session = manager.middleware_data.get('db_session')
+    message_text = await cost_calculation(config=config, db_session=session, data=dialog_data)
     await callback.message.answer(message_text)

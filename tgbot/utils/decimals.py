@@ -17,10 +17,10 @@ def value_to_decimal(value, decimal_places: int = 8) -> decimal.Decimal:
     return decimal.Decimal(str(float(value))).quantize(decimal.Decimal('1e-{}'.format(decimal_places)))
 
 
-def check_digit_value(text: str, type_factory: TypeFactory[T] = int, min=1, max=999):
+def check_digit_value(text: str, type_factory: TypeFactory[T] = int, min=1, max=999999999):
     # type_factory: TypeFactory[T] = type_factory
     try:
         value = d if min <= (d := type_factory(text)) <= max else 1
     except ValueError:
-        value = 1
+        raise
     return value

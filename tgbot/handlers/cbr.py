@@ -28,7 +28,7 @@ async def cbr_get(message: types.Message, state: FSMContext, **data):
              f"{p.value}" for p in result])
     else:
         message_text = "Нет доступных для обновления курсов валют.\n"
-        result = await get_last_pairs(db_session, base_currency=config.form_currencies)
+        result = await get_last_pairs(db_session)
         if len(result):
             message_text += f"Курсы вапют на <b>{result[0].timestamp: %d.%m.%Y}</b>\n"
             message_text += "\n".join(

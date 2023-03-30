@@ -22,6 +22,7 @@ class ConfigMiddleware(BaseMiddleware):
         data["config"] = self.config
         data["db_session"] = self.db_session
         data["http_session"] = self.http_session
+        data["http_proxy"] = self.http_proxy
         return await handler(event, data)
 
 

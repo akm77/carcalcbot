@@ -1,17 +1,16 @@
 from aiogram.enums import ContentType
 from aiogram_dialog import Window
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Cancel
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.text import Format
 
-from . import states, getters, keyboards, onclick
+from . import states, getters, keyboards
 
 CALC_FORM = ("Поиск для: {started_by}\n"
              "{required_fields_text}\n"
              "--------------------------------------------------\n"
              "Страна: <b>{country_name}</b>\n"
-             "Цена: <b>{sell_price}</b> {sell_currency}\n"
-             "Возраст:  <b>{car_age_name}</b>\n"
+             "Цена: <b>{sell_price}</b> {sell_currency} {sell_price_quote_currency}\n"
+             "Возраст:  <b>{car_age}</b>\n"
              "Объем двигателя: <b>{engine_volume}</b> см3\n"
              "{engine_detail}"
              "Получатель: <b>{buyer_type_name}</b>")

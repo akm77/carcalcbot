@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
+from enum import unique
 from typing import List
 
-from sqlalchemy import String, ForeignKey, text, Boolean, Date
+from sqlalchemy import String, ForeignKey, text, Boolean, Date, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import expression
 
@@ -58,6 +59,7 @@ class CountryCurrency(Base):
     country_iso_code2: Mapped[str] = mapped_column(String(2), ForeignKey("country.iso_code2",
                                                                          ondelete="CASCADE",
                                                                          onupdate="CASCADE"),
+                                                   unique=True,
                                                    primary_key=True)
     currency_iso_code_char: Mapped[str] = mapped_column(String(3), ForeignKey("currency.iso_code_char",
                                                                               ondelete="CASCADE",
@@ -82,3 +84,58 @@ class CurrencyPair(TimestampMixin, Base):
     value: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
     base_currency: Mapped["Currency"] = relationship(foreign_keys=[base_currency_code])
     quote_currency: Mapped["Currency"] = relationship(foreign_keys=[quote_currency_code])
+
+
+class CustomsClearanceFee(Base):
+    __tablename__ = "customs_clearance_fee"
+
+    price: Mapped[int] = mapped_column(primary_key=True)
+    fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class ExciseDuty(Base):
+    __tablename__ = "excise_duty"
+
+    engine_power: Mapped[int] = mapped_column(primary_key=True)
+    fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class DisposalFee(Base):
+    __tablename__ = "disposal_fee"
+
+    buyer_type: Mapped[str] = mapped_column(String(),
+                                            CheckConstraint("buyer_type IN ('entity', 'private')",
+                                                            name="check_buyer_type"),
+                                            primary_key=True)
+    car_age: Mapped[str] = mapped_column(server_default="age", primary_key=True)
+    engine_volume: Mapped[int] = mapped_column(primary_key=True)
+    multiplier: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class DutyPrivateCarNew(Base):
+    __tablename__ = 'duty_private_car_new'
+
+    price: Mapped[int] = mapped_column(primary_key=True)
+    percent: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+    check_value: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class DutyPrivateCarAged(Base):
+    __tablename__ = 'duty_private_car_aged'
+
+    car_age: Mapped[str] = mapped_column(server_default="age", primary_key=True)
+    engine_volume: Mapped[int] = mapped_column(primary_key=True)
+    value: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class DutyEntityCar(Base):
+    __tablename__ = 'duty_entity_car'
+
+    fuel_type: Mapped[str] = mapped_column(String(),
+                                           CheckConstraint("fuel_type IN ('diesel', 'gasoline')",
+                                                           name="check_fuel_type"),
+                                           primary_key=True)
+    car_age: Mapped[str] = mapped_column(server_default="age", primary_key=True)
+    engine_volume: Mapped[int] = mapped_column(primary_key=True)
+    percent: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+    check_value: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))

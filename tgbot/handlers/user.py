@@ -13,9 +13,9 @@ async def user_start(message: Message, dialog_manager: DialogManager, **kwargs):
     await dialog_manager.start(states.CalculatorStates.enter_data,
                                data={"started_by": message.from_user.mention_html(),
                                      "country_code": "JP",
-                                     "sell_currency_code": "usd",
-                                     "fuel_code": "ben",
-                                     "uop_code": "ls",
+                                     "sell_currency_code": "JPY",
+                                     "fuel_code": "gasoline",
+                                     "uop_code": "hp",
                                      "car_age_code": "age0",
-                                     "buyer_type_code": "fiz"},
+                                     "buyer_type_code": "private"},
                                mode=StartMode.RESET_STACK)

@@ -9,7 +9,7 @@ from lxml import etree
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from tgbot.config import Settings
-from tgbot.models.calculation import CurrencyPair
+from tgbot.models.costing_data import CurrencyPair
 from tgbot.models.db_commands import get_cbr_currency_codes, upsert_currency_pair
 from tgbot.services.url_reader import UrlReader, UrlReaderMode
 from tgbot.utils.decimals import value_to_decimal
@@ -23,7 +23,6 @@ async def set_cbr_currencies_pair(config: Settings,
                                   http_proxy: Optional[StrOrURL]) -> Optional[Sequence[CurrencyPair]]:
     logger.info("Start update currency pair from Russia central bank source")
     db_session = db_session
-    currencies = config.form_currencies
     quote_currency = config.quote_currency
     user_agent = UserAgent().random
     headers = {"User-Agent": user_agent,
@@ -32,10 +31,11 @@ async def set_cbr_currencies_pair(config: Settings,
                        url="https://www.cbr.ru/scripts/XML_daily.asp",
                        headers=headers,
                        mode=UrlReaderMode.HTML,
+                       proxy=http_proxy,
                        logger=logger)
     currencies_xml = await reader.get_raw_data()
 
-    cbr_codes = await get_cbr_currency_codes(session=db_session, codes=currencies)
+    cbr_codes = await get_cbr_currency_codes(session=db_session)
     tree = etree.fromstring(bytes(currencies_xml, encoding="windows-1251"))
     day, month, year = tree.attrib.get("Date").split(".")
     currency_pair_date = datetime.date(int(year), int(month), int(day))

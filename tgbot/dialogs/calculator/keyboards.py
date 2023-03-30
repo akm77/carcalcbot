@@ -64,19 +64,19 @@ def select_unit_of_power_kbd():
 
 def select_sell_currency_price():
     return Group(SwitchTo(Const("✍️ Цена"),
-                        id=constants.CalculatorForm.ENTER_PRICE,
-                        state=states.CalculatorStates.enter_price),
-               Radio(
-                   Format("✓ {item[0]}"),
-                   Format("  {item[0]}"),
-                   id=constants.CalculatorForm.SELECT_SELL_CURRENCY,
-                   item_id_getter=operator.itemgetter(1),
-                   on_state_changed=events.on_sell_currency_changed,
-                   items="sell_currencies",
-               ),
+                          id=constants.CalculatorForm.ENTER_PRICE,
+                          state=states.CalculatorStates.enter_price),
+                 Radio(
+                     Format("✓ {item[0]}"),
+                     Format("  {item[0]}"),
+                     id=constants.CalculatorForm.SELECT_SELL_CURRENCY,
+                     item_id_getter=operator.itemgetter(1),
+                     on_state_changed=events.on_sell_currency_changed,
+                     items="sell_currencies",
+                 ),
                  width=3
 
-               )
+                 )
 
 
 def select_car_age_kbd():
@@ -110,7 +110,8 @@ def calc_final_action_kbd():
     return Row(
         Cancel(Const("<<"),
                id="__exit__"),
-        Cancel(Const("🏁 Рассчитать 🚀"),
+        Button(Const("🏁 Рассчитать 🚀"),
+               id=constants.CalculatorForm.CALC_COSTS,
                on_click=onclick.on_click_calculate,
                when=whenable.check_required_fields)
     )
