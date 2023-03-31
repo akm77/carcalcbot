@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from tgbot.config import Settings
 from tgbot.models.db_commands import get_last_pairs, get_customs_clearance_fee, get_disposal_fee, get_excise_duty_fee, \
-    get_duty_private_car_new, get_duty_private_car_aged, get_duty_entity_car
+    get_duty_private_car_new, get_duty_private_car_aged, get_duty_entity_car, get_commission_fee, get_other_expenses_fee
 from tgbot.utils.decimals import value_to_decimal, format_decimal
 
 
@@ -252,16 +252,30 @@ async def cost_calculation_for_entity(config: Settings, db_session: async_sessio
     return price, customs_clearance_cost, disposal_cost, excise_cost, customs_duty
 
 
+async def get_non_customs_costs(config: Settings,
+                                db_session: async_sessionmaker,
+                                price_rub: Decimal) -> Optional[tuple]:
+    commission = await get_commission_fee(session=db_session, price_rub=round(price_rub))
+    gps = await get_other_expenses_fee(session=db_session, code="gps")
+    feed = await get_other_expenses_fee(session=db_session, code="lab")
+    return commission, gps, feed
+
+
 async def cost_calculation(config: Settings, db_session: async_sessionmaker, data: dict) -> Optional[str]:
     buyer_type_code = data.get("buyer_type_code")
 
     if buyer_type_code == "private":
         price, customs_clearance_cost, disposal_cost, customs_duty = \
             await cost_calculation_for_private(config=config, db_session=db_session, data=data)
-        total = sum([price["EUR"].quote_currency_value,
-                     customs_clearance_cost["EUR"].quote_currency_value,
-                     disposal_cost["EUR"].quote_currency_value,
-                     customs_duty["EUR"].quote_currency_value])
+        customs_total = sum([price["EUR"].quote_currency_value,
+                             customs_clearance_cost["EUR"].quote_currency_value,
+                             disposal_cost["EUR"].quote_currency_value,
+                             customs_duty["EUR"].quote_currency_value])
+        commission, gps, feed = await get_non_customs_costs(config=config,
+                                                            db_session=db_session,
+                                                            price_rub=price["EUR"].quote_currency_value)
+        grand_total = sum([customs_total, commission, gps, feed])
+
         message_text = f"""<pre>{"-" * 30}</pre>  
 Расчет стоимости
 <pre>{"-" * 30}</pre>  
@@ -270,7 +284,15 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
 Утилизационный сбор: <b>{format_decimal(disposal_cost["EUR"].quote_currency_value, pre=2)}</b> {disposal_cost["EUR"].quote_currency} 
 Пошлина: <b>{format_decimal(customs_duty["EUR"].quote_currency_value, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
 <pre>{"=" * 30}</pre>
-Итого: <b>{format_decimal(total, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
+Итого: <b>{format_decimal(customs_total, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
+<pre>{"-" * 30}</pre>
+Логистика, сертификация\nи сопровождение сделки
+ 
+СВХ, СБКТС: <b>{format_decimal(feed, pre=2)}</b> {price["EUR"].quote_currency} 
+Оборудование Эра-Глонасс: <b>{format_decimal(gps, pre=2)}</b> {price["EUR"].quote_currency} 
+Комиссия: <b>{format_decimal(commission, pre=2)}</b> {price["EUR"].quote_currency} 
+<pre>{"=" * 30}</pre>
+<b>ВСЕГО: {format_decimal(grand_total, pre=2)}</b> {price["EUR"].quote_currency}  
 """
     else:
         price, customs_clearance_cost, disposal_cost, excise_cost, customs_duty = \
@@ -278,12 +300,17 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
         vat = (price["EUR"].quote_currency_value +
                excise_cost["EUR"].quote_currency_value +
                customs_duty["EUR"].quote_currency_value) * config.vat / 100
-        total = sum([price["EUR"].quote_currency_value,
-                     customs_clearance_cost["EUR"].quote_currency_value,
-                     disposal_cost["EUR"].quote_currency_value,
-                     excise_cost["EUR"].quote_currency_value,
-                     customs_duty["EUR"].quote_currency_value,
-                     vat])
+        customs_total = sum([price["EUR"].quote_currency_value,
+                             customs_clearance_cost["EUR"].quote_currency_value,
+                             disposal_cost["EUR"].quote_currency_value,
+                             excise_cost["EUR"].quote_currency_value,
+                             customs_duty["EUR"].quote_currency_value,
+                             vat])
+        commission, gps, feed = await get_non_customs_costs(config=config,
+                                                            db_session=db_session,
+                                                            price_rub=price["EUR"].quote_currency_value)
+        grand_total = sum([customs_total, commission, gps, feed])
+
         message_text = f"""Расчет стоимости 
 <pre>{"-" * 30}</pre>
 Цена: <b>{format_decimal(price["EUR"].quote_currency_value, pre=2)}</b> {price["EUR"].quote_currency}
@@ -293,6 +320,14 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
 Пошлина: <b>{format_decimal(customs_duty["EUR"].quote_currency_value, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
 НДС: <b>{format_decimal(vat, pre=2)} {excise_cost["EUR"].quote_currency}</b>
 <pre>{"=" * 30}</pre>
-Итого: <b>{format_decimal(total, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
+Итого: <b>{format_decimal(customs_total, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
+<pre>{"-" * 30}</pre>  
+Логистика, сертификация\nи сопровождение сделки
+ 
+СВХ, СБКТС: <b>{format_decimal(feed, pre=2)}</b> {price["EUR"].quote_currency} 
+Оборудование Эра-Глонасс: <b>{format_decimal(gps, pre=2)}</b> {price["EUR"].quote_currency} 
+Комиссия: <b>{format_decimal(commission, pre=2)}</b> {price["EUR"].quote_currency} 
+<pre>{"=" * 30}</pre>
+<b>ВСЕГО: {format_decimal(grand_total, pre=2)}</b> {price["EUR"].quote_currency}  
 """
     return message_text
