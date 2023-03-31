@@ -2,12 +2,13 @@ from decimal import Decimal
 from typing import Sequence, Dict, List, Any
 
 from charset_normalizer.md import Optional
-from sqlalchemy import Result, select, delete, func
+from sqlalchemy import Result, select, delete, func, update
 from sqlalchemy.dialects.sqlite import insert, Insert
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from tgbot.models.costing_data import User as DBUser, RuCentralBank, CurrencyPair, Country, Currency, CountryCurrency, \
-    CustomsClearanceFee, ExciseDuty, DisposalFee, DutyPrivateCarNew, DutyPrivateCarAged, DutyEntityCar
+    CustomsClearanceFee, ExciseDuty, DisposalFee, DutyPrivateCarNew, DutyPrivateCarAged, DutyEntityCar, Commission, \
+    JapanAuctionCosts, OtherExpenses
 from aiogram.types import User
 
 
@@ -188,3 +189,36 @@ async def get_duty_entity_car(session: async_sessionmaker,
     async with session() as session:
         result: Result = await session.execute(select_statement)
     return result.one_or_none()
+
+
+async def get_commission_fee(session: async_sessionmaker, price_rub: int) -> Optional[Decimal]:
+    price_boundary = select(func.max(Commission.price).label("boundary"))
+    price_boundary = price_boundary.where(Commission.price < price_rub).cte("price_boundary")
+    select_statement = select(Commission.commission).where(Commission.price == price_boundary.c.boundary)
+    async with session() as session:
+        result: Result = await session.execute(select_statement)
+    return result.scalar_one_or_none()
+
+
+async def get_japan_auction_fee(session: async_sessionmaker, price_jpy: int) -> Optional[Decimal]:
+    price_boundary = select(func.max(JapanAuctionCosts.price).label("boundary"))
+    price_boundary = price_boundary.where(JapanAuctionCosts.price < price_jpy).cte("price_boundary")
+    select_statement = select(JapanAuctionCosts.fee).where(JapanAuctionCosts.price == price_boundary.c.boundary)
+    async with session() as session:
+        result: Result = await session.execute(select_statement)
+    return result.scalar_one_or_none()
+
+
+async def get_other_expenses_fee(session: async_sessionmaker, code: str) -> Optional[Decimal]:
+    select_statement = select(OtherExpenses.fee).where(OtherExpenses.code == code)
+    async with session() as session:
+        result: Result = await session.execute(select_statement)
+    return result.scalar_one_or_none()
+
+
+async def update_other_expenses_fee(session: async_sessionmaker, code: str, fee: Decimal) -> Optional[Decimal]:
+    update_statement = update(OtherExpenses).where(OtherExpenses.code == code).values({"fee": fee})
+    async with session() as session:
+        result: Result = await session.execute(update_statement)
+        await session.commit()
+    return result.scalar_one_or_none()

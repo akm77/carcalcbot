@@ -139,3 +139,24 @@ class DutyEntityCar(Base):
     engine_volume: Mapped[int] = mapped_column(primary_key=True)
     percent: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
     check_value: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class Commission(Base):
+    __tablename__ = "commission"
+
+    price: Mapped[int] = mapped_column(primary_key=True)
+    commission: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class OtherExpenses(Base):
+    __tablename__ = "other_expenses"
+
+    code: Mapped[str] = mapped_column(server_default="gps", primary_key=True)
+    fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class JapanAuctionCosts(Base):
+    __tablename__ = "japan_auction_costs"
+
+    price: Mapped[int] = mapped_column(primary_key=True)
+    fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
