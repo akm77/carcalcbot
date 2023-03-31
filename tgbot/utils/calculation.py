@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from tgbot.config import Settings
 from tgbot.models.db_commands import get_last_pairs, get_customs_clearance_fee, get_disposal_fee, get_excise_duty_fee, \
     get_duty_private_car_new, get_duty_private_car_aged, get_duty_entity_car
-from tgbot.utils.decimals import value_to_decimal
+from tgbot.utils.decimals import value_to_decimal, format_decimal
 
 
 @dataclass
@@ -258,11 +258,19 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
     if buyer_type_code == "private":
         price, customs_clearance_cost, disposal_cost, customs_duty = \
             await cost_calculation_for_private(config=config, db_session=db_session, data=data)
-        message_text = f"""Цена: <b>{price["EUR"].quote_currency_value}</b> {price["EUR"].quote_currency}
-Таможенный сбор: <b>{customs_clearance_cost["EUR"].quote_currency_value}</b> {customs_clearance_cost["EUR"].quote_currency}
-Утилизационный сбор: <b>{disposal_cost["EUR"].quote_currency_value}</b> {disposal_cost["EUR"].quote_currency} 
-Пошлина: <b>{customs_duty["EUR"].quote_currency_value}</b> {customs_duty["EUR"].quote_currency} 
-{"="*40}
+        total = sum([price["EUR"].quote_currency_value,
+                     customs_clearance_cost["EUR"].quote_currency_value,
+                     disposal_cost["EUR"].quote_currency_value,
+                     customs_duty["EUR"].quote_currency_value])
+        message_text = f"""<pre>{"-" * 30}</pre>  
+Расчет стоимости
+<pre>{"-" * 30}</pre>  
+Цена: <b>{format_decimal(price["EUR"].quote_currency_value, pre=2)}</b> {price["EUR"].quote_currency}
+Таможенный сбор: <b>{format_decimal(customs_clearance_cost["EUR"].quote_currency_value, pre=2)}</b> {customs_clearance_cost["EUR"].quote_currency}
+Утилизационный сбор: <b>{format_decimal(disposal_cost["EUR"].quote_currency_value, pre=2)}</b> {disposal_cost["EUR"].quote_currency} 
+Пошлина: <b>{format_decimal(customs_duty["EUR"].quote_currency_value, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
+<pre>{"=" * 30}</pre>
+Итого: <b>{format_decimal(total, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
 """
     else:
         price, customs_clearance_cost, disposal_cost, excise_cost, customs_duty = \
@@ -270,13 +278,21 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker, dat
         vat = (price["EUR"].quote_currency_value +
                excise_cost["EUR"].quote_currency_value +
                customs_duty["EUR"].quote_currency_value) * config.vat / 100
-        message_text = f"""Цена: <b>{price["EUR"].quote_currency_value}</b> {price["EUR"].quote_currency}
-Таможенный сбор: <b>{customs_clearance_cost["EUR"].quote_currency_value}</b> {customs_clearance_cost["EUR"].quote_currency}
-Утилизационный сбор: <b>{disposal_cost["EUR"].quote_currency_value}</b> {disposal_cost["EUR"].quote_currency} 
-Акциз: <b>{excise_cost["EUR"].quote_currency_value}</b> {excise_cost["EUR"].quote_currency} 
-НДС: <b>{vat} {excise_cost["EUR"].quote_currency}</b>
-Пошлина: <b>{customs_duty["EUR"].quote_currency_value}</b> {customs_duty["EUR"].quote_currency} 
-{"="*40}
+        total = sum([price["EUR"].quote_currency_value,
+                     customs_clearance_cost["EUR"].quote_currency_value,
+                     disposal_cost["EUR"].quote_currency_value,
+                     excise_cost["EUR"].quote_currency_value,
+                     customs_duty["EUR"].quote_currency_value,
+                     vat])
+        message_text = f"""Расчет стоимости 
+<pre>{"-" * 30}</pre>
+Цена: <b>{format_decimal(price["EUR"].quote_currency_value, pre=2)}</b> {price["EUR"].quote_currency}
+Таможенный сбор: <b>{format_decimal(customs_clearance_cost["EUR"].quote_currency_value, pre=2)}</b> {customs_clearance_cost["EUR"].quote_currency}
+Утилизационный сбор: <b>{format_decimal(disposal_cost["EUR"].quote_currency_value, pre=2)}</b> {disposal_cost["EUR"].quote_currency} 
+Акциз: <b>{format_decimal(excise_cost["EUR"].quote_currency_value, pre=2)}</b> {excise_cost["EUR"].quote_currency} 
+Пошлина: <b>{format_decimal(customs_duty["EUR"].quote_currency_value, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
+НДС: <b>{format_decimal(vat, pre=2)} {excise_cost["EUR"].quote_currency}</b>
+<pre>{"=" * 30}</pre>
+Итого: <b>{format_decimal(total, pre=2)}</b> {customs_duty["EUR"].quote_currency} 
 """
     return message_text
-

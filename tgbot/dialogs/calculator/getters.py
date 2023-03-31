@@ -25,7 +25,9 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
     car_age_code = dialog_data.get("car_age_code") or start_data.get("car_age_code")
     buyer_type_code = dialog_data.get("buyer_type_code") or start_data.get("buyer_type_code")
     uop_code = dialog_data.get("uop_code") or start_data.get("uop_code")
-
+    cost_calculation_text = dialog_data.get("cost_calculation_text") or ""
+    if dialog_data.get("cost_calculation_text"):
+        dialog_data.pop("cost_calculation_text")
     last_pair = await get_last_pairs(session=session, base_currencies=[sell_currency_code])
     if last_pair:
         lp = last_pair[0]
@@ -109,4 +111,5 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
             "car_ages": car_ages,
             "fuel_types": fuel_types,
             "countries": countries,
-            "units_of_power": units_of_power}
+            "units_of_power": units_of_power,
+            "cost_calculation_text": cost_calculation_text}
