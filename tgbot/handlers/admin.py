@@ -34,6 +34,7 @@ async def admin_start(message: Message, dialog_manager: DialogManager,  **data):
                                      "country_code": "JP",
                                      "sell_currency_code": "JPY",
                                      "fuel_code": "gasoline",
+                                     "freight_type": "direct",
                                      "uop_code": "hp",
                                      "car_age_code": "age0",
                                      "buyer_type_code": "private"},

@@ -6,9 +6,11 @@ from aiogram_dialog.widgets.text import Format
 from . import states, getters, keyboards
 
 CALC_FORM = ("Поиск для: {started_by}\n"
+             "{currency_pairs}\n"
              "{required_fields_text}\n"
              "<pre>------------------------------</pre>\n"
              "Страна: <b>{country_name}</b>\n"
+             "Доставка: <b>{freight_name}</b>\n"
              "Цена: <b>{sell_price}</b> {sell_currency} {sell_price_quote_currency}\n"
              "Возраст:  <b>{car_age}</b>\n"
              "Объем двигателя: <b>{engine_volume}</b> см3\n"
@@ -20,6 +22,7 @@ CALC_FORM = ("Поиск для: {started_by}\n"
 def calculator_window():
     return Window(Format(CALC_FORM),
                   keyboards.select_country_kbd(),
+                  keyboards.select_freight_type_kbd(),
                   keyboards.select_car_age_kbd(),
                   keyboards.select_sell_currency_price(),
                   keyboards.enter_engine_data(),

@@ -13,6 +13,7 @@ class CalculatorForm(str, Enum):
     SELECT_FUEL_TYPE = "cf09"
     SELECT_UNIT_OF_POWER = "cf10"
     CALC_COSTS = "cf11"
+    SELECT_FREIGHT_TYPE = "cf12"
 
     def __str__(self) -> str:
         return str.__str__(self)

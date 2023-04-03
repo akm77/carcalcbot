@@ -19,3 +19,17 @@ def is_legal_entity(data: Dict, widget: Whenable, manager: DialogManager):
     start_data = data.get("start_data")
     buyer_type_code = dialog_data.get("buyer_type_code") or start_data.get("buyer_type_code")
     return buyer_type_code == "entity"
+
+
+def is_not_japan(data: Dict, widget: Whenable, manager: DialogManager):
+    dialog_data = data.get("dialog_data")
+    start_data = data.get("start_data")
+    country_code = dialog_data.get("country_code") or start_data.get("country_code")
+    return country_code != "JP"
+
+
+def is_direct_freight(data: Dict, widget: Whenable, manager: DialogManager):
+    dialog_data = data.get("dialog_data")
+    start_data = data.get("start_data")
+    freight_type = dialog_data.get("freight_type") or start_data.get("freight_type")
+    return freight_type == "direct"

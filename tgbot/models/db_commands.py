@@ -1,15 +1,15 @@
 from decimal import Decimal
 from typing import Sequence, Dict, List, Any
 
+from aiogram.types import User
 from charset_normalizer.md import Optional
-from sqlalchemy import Result, select, delete, func, update
+from sqlalchemy import Result, select, func, update
 from sqlalchemy.dialects.sqlite import insert, Insert
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from tgbot.models.costing_data import User as DBUser, RuCentralBank, CurrencyPair, Country, Currency, CountryCurrency, \
     CustomsClearanceFee, ExciseDuty, DisposalFee, DutyPrivateCarNew, DutyPrivateCarAged, DutyEntityCar, Commission, \
-    JapanAuctionCosts, OtherExpenses
-from aiogram.types import User
+    JapanAuctionCosts, OtherRussiaExpenses, FreightRates, CountrySpecificExpenses
 
 
 def get_upsert_user_query(values) -> Insert:
@@ -209,16 +209,34 @@ async def get_japan_auction_fee(session: async_sessionmaker, price_jpy: int) -> 
     return result.scalar_one_or_none()
 
 
-async def get_other_expenses_fee(session: async_sessionmaker, code: str) -> Optional[Decimal]:
-    select_statement = select(OtherExpenses.fee).where(OtherExpenses.code == code)
+async def get_other_russia_expenses_fee(session: async_sessionmaker, code: str) -> Optional[Decimal]:
+    select_statement = select(OtherRussiaExpenses.fee).where(OtherRussiaExpenses.code == code)
     async with session() as session:
         result: Result = await session.execute(select_statement)
     return result.scalar_one_or_none()
 
 
-async def update_other_expenses_fee(session: async_sessionmaker, code: str, fee: Decimal) -> Optional[Decimal]:
-    update_statement = update(OtherExpenses).where(OtherExpenses.code == code).values({"fee": fee})
+async def update_other_russia_expenses_fee(session: async_sessionmaker, code: str, fee: Decimal) -> Optional[Decimal]:
+    update_statement = update(OtherRussiaExpenses).where(OtherRussiaExpenses.code == code).values({"fee": fee})
     async with session() as session:
         result: Result = await session.execute(update_statement)
         await session.commit()
+    return result.scalar_one_or_none()
+
+
+async def get_freight_rate(session: async_sessionmaker, country_code: str, freight_type: str) -> Optional[Decimal]:
+    select_statement = select(FreightRates.fee).where(FreightRates.country_code == country_code,
+                                                      FreightRates.freight_type == freight_type)
+    async with session() as session:
+        result: Result = await session.execute(select_statement)
+    return result.scalar_one_or_none()
+
+
+async def get_country_specific_expense(session: async_sessionmaker,
+                                       country_code: str,
+                                       service_code: str) -> Optional[Sequence[CountrySpecificExpenses]]:
+    select_statement = select(CountrySpecificExpenses.fee).where(CountrySpecificExpenses.country_code == country_code,
+                                                                 CountrySpecificExpenses.code == service_code)
+    async with session() as session:
+        result: Result = await session.execute(select_statement)
     return result.scalar_one_or_none()

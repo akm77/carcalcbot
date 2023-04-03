@@ -148,8 +148,8 @@ class Commission(Base):
     commission: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
 
 
-class OtherExpenses(Base):
-    __tablename__ = "other_expenses"
+class OtherRussiaExpenses(Base):
+    __tablename__ = "other_russia_expenses"
 
     code: Mapped[str] = mapped_column(server_default="gps", primary_key=True)
     fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
@@ -160,3 +160,31 @@ class JapanAuctionCosts(Base):
 
     price: Mapped[int] = mapped_column(primary_key=True)
     fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+
+
+class FreightRates(Base):
+    __tablename__ = "freight_rates"
+
+    country_code: Mapped[str] = mapped_column(String(2), ForeignKey("country.iso_code2",
+                                                                    ondelete="CASCADE",
+                                                                    onupdate="CASCADE"),
+                                              primary_key=True)
+    freight_type: Mapped[str] = mapped_column(CheckConstraint("freight_type IN ('direct', 'indirect')",
+                                                              name="check_freight_type"),
+                                              primary_key=True)
+    fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+    country: Mapped["Country"] = relationship()
+
+
+class CountrySpecificExpenses(Base):
+    __tablename__ = "country_specific_expenses"
+
+    country_code: Mapped[str] = mapped_column(String(2), ForeignKey("country.iso_code2",
+                                                                    ondelete="CASCADE",
+                                                                    onupdate="CASCADE"),
+                                              primary_key=True)
+    code: Mapped[str] = mapped_column(server_default="service", primary_key=True)
+    title: Mapped[str] = mapped_column(server_default="service", nullable=False)
+    fee: Mapped[Decimal] = mapped_column(AccountingInteger, nullable=False, server_default=text("0"))
+    country: Mapped["Country"] = relationship()
+

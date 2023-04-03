@@ -102,7 +102,8 @@ def select_buyer_type_kbd():
             item_id_getter=operator.itemgetter(1),
             on_state_changed=events.on_buyer_type_changed,
             items="buyer_types",
-        )
+        ),
+        when=whenable.is_direct_freight
     )
 
 
@@ -114,4 +115,18 @@ def calc_final_action_kbd():
                id=constants.CalculatorForm.CALC_COSTS,
                on_click=onclick.on_click_calculate,
                when=whenable.check_required_fields)
+    )
+
+
+def select_freight_type_kbd():
+    return Row(
+        Radio(
+            Format("✓ {item[0]}"),
+            Format("  {item[0]}"),
+            id=constants.CalculatorForm.SELECT_FREIGHT_TYPE,
+            item_id_getter=operator.itemgetter(1),
+            on_state_changed=events.on_freight_type_changed,
+            items="freight_types"
+        ),
+        when=whenable.is_not_japan
     )

@@ -6,6 +6,7 @@ import aiohttp
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
+from aiogram_dialog.widgets.text import setup_jinja
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tgbot.config import settings
@@ -18,6 +19,7 @@ from tgbot.middlewares.config import ConfigMiddleware, UserDBMiddleware
 from tgbot.models.base import create_db_session
 from tgbot.services import broadcaster
 from tgbot.services.aps_scheduler import setup_scheduler
+from tgbot.utils.calculation import formatvalue
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ async def main():
     dp = Dispatcher(storage=storage)
     dp["http_session"] = http_session
     dp.shutdown.register(on_shutdown)
+    setup_jinja(bot=bot, filters={"formatvalue": formatvalue}, enable_async=True)
     setup_dialogs(dp)
 
     for router in [

@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     disposal_fee_base: str
     excise_base: str
     duty_base: str
+    freight_base: str
+    other_services_base: str
     unit_of_power: str
 
     fuel_types: dict
@@ -36,6 +38,7 @@ class Settings(BaseSettings):
     age_range_private: dict
     age_range_entity: dict
     units_of_power: dict
+    freight_types: dict
 
     disposal_fee: int
     vat: int
@@ -47,7 +50,9 @@ class Settings(BaseSettings):
                 return [int(x) for x in raw_val.split(',')]
             if field_name in ("form_countries", "form_currencies"):
                 return [x for x in raw_val.split(',')]
-            if field_name in ("fuel_types", "buyer_types", "age_range_private", "age_range_entity", "units_of_power"):
+            if field_name in ("fuel_types", "buyer_types",
+                              "age_range_private", "age_range_entity",
+                              "units_of_power", "freight_types"):
                 return {pair.split(":")[0]: pair.split(":")[1] for pair in raw_val.split(",")}
             return cls.json_loads(raw_val)
 

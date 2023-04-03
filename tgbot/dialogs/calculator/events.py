@@ -11,6 +11,8 @@ from ...utils.decimals import check_digit_value
 async def on_country_changed(event: ChatEvent, widget: ManagedWidget[Select], manager: DialogManager, item_id):
     ctx = manager.current_context()
     ctx.dialog_data.update(country_code=item_id)
+    if item_id == "JP":
+        ctx.dialog_data.update(freight_type="direct")
 
 
 async def on_car_age_changed(event: ChatEvent, widget: ManagedWidget[Select], manager: DialogManager, item_id):
@@ -36,6 +38,13 @@ async def on_uop_changed(event: ChatEvent, widget: ManagedWidget[Select], manage
 async def on_buyer_type_changed(event: ChatEvent, widget: ManagedWidget[Select], manager: DialogManager, item_id):
     ctx = manager.current_context()
     ctx.dialog_data.update(buyer_type_code=item_id)
+
+
+async def on_freight_type_changed(event: ChatEvent, widget: ManagedWidget[Select], manager: DialogManager, item_id):
+    ctx = manager.current_context()
+    ctx.dialog_data.update(freight_type=item_id)
+    if item_id == "indirect":
+        ctx.dialog_data.update(buyer_type_code="private")
 
 
 async def on_enter_price(message: Message, message_input: MessageInput,

@@ -21,6 +21,7 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
     engine_power = dialog_data.get("engine_power") or 0
     country_code = dialog_data.get("country_code") or start_data.get("country_code")
     fuel_code = dialog_data.get("fuel_code") or start_data.get("fuel_code")
+    freight_type = dialog_data.get("freight_type") or start_data.get("freight_type")
     sell_currency_code = dialog_data.get("sell_currency_code") or start_data.get("sell_currency_code")
     car_age_code = dialog_data.get("car_age_code") or start_data.get("car_age_code")
     buyer_type_code = dialog_data.get("buyer_type_code") or start_data.get("buyer_type_code")
@@ -49,6 +50,7 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
 
     buyer_types = [(buyer, id) for id, buyer in config.buyer_types.items()]
     units_of_power = [(unit, id) for id, unit in config.units_of_power.items()]
+    freight_types = [(freight, id) for id, freight in config.freight_types.items()]
 
     db_country_currency = await get_country_currency(session, country=country_code)
     form_currencies = copy(config.form_currencies)
@@ -63,6 +65,10 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
     await country_kbd.set_checked(item_id=country_code)
     country_name = next((country[0] for country in countries if country[1] == country_code))
 
+    select_freight_type_kbd = dialog_manager.find(constants.CalculatorForm.SELECT_FREIGHT_TYPE)
+    await select_freight_type_kbd.set_checked(item_id=freight_type)
+    freight_name = config.freight_types.get(freight_type)
+
     select_fuel_type_kbd = dialog_manager.find(constants.CalculatorForm.SELECT_FUEL_TYPE)
     await select_fuel_type_kbd.set_checked(item_id=fuel_code)
     fuel_name = config.fuel_types.get(fuel_code)
@@ -70,9 +76,6 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
     select_sell_currency_kbd = dialog_manager.find(constants.CalculatorForm.SELECT_SELL_CURRENCY)
     await select_sell_currency_kbd.set_checked(item_id=sell_currency_code)
     sell_currency = sell_currency_code
-    # sell_currency = next((currency[0] for currency in sell_currencies if currency[1] == sell_currency_code))
-    if not sell_currency:
-        await dialog_manager.done()
 
     car_age_kbd = dialog_manager.find(constants.CalculatorForm.SELECT_CAR_AGE)
     await car_age_kbd.set_checked(item_id=car_age_code)
@@ -93,11 +96,21 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
     engine_detail = (f"Тип топлива: <b>{fuel_name}</b>\n"
                      f"Мощность двигателя: <b>{engine_power}</b> {uop_name}\n") if buyer_type_code == "entity" else ""
 
+    result = await get_last_pairs(session)
+    currency_pairs = ""
+    if len(result):
+        currency_pairs += f"Курсы вапют на <b>{result[0].timestamp: %d.%m.%Y}</b>\n"
+        currency_pairs += "\n".join(
+            [f"<code>{p.nominal:5d} {p.base_currency_code}/{p.quote_currency_code}</code> "
+             f"{p.value}" for p in result])
+
     return {"started_by": started_by,
             "required_fields_text": required_fields_text,
+            "currency_pairs": currency_pairs,
             "engine_detail": engine_detail,
             "sell_currency": f"{sell_currency}",
             "sell_price_quote_currency": sell_price_quote_currency,
+            "freight_name": freight_name,
             "sell_price": sell_price,
             "country_name": f"{country_name}",
             "fuel_name": fuel_name,
@@ -112,4 +125,5 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
             "fuel_types": fuel_types,
             "countries": countries,
             "units_of_power": units_of_power,
+            "freight_types": freight_types,
             "cost_calculation_text": cost_calculation_text}

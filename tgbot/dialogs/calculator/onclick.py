@@ -15,5 +15,8 @@ async def on_click_calculate(callback: CallbackQuery, button: Button, manager: D
     dialog_data = manager.current_context().dialog_data
     config: Settings = manager.middleware_data.get("config")
     session = manager.middleware_data.get('db_session')
-    cost_calculation_text = await cost_calculation(config=config, db_session=session, data=dialog_data)
+    cost_calculation_text = await cost_calculation(config=config,
+                                                   db_session=session,
+                                                   data=dialog_data,
+                                                   manager=manager)
     dialog_data.update(cost_calculation_text=cost_calculation_text)
