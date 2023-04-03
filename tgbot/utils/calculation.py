@@ -274,7 +274,9 @@ def get_message_text() -> str:
 {% endif %}
 {% if buyer_type_code == "entity" and freight_type == "direct" %}
 Акциз: <b>{{excise_cost|formatvalue}}</b> {{currency}}
+{% endif %}
 Пошлина: <b>{{customs_duty|formatvalue}}</b> {{currency}} 
+{% if buyer_type_code == "entity" and freight_type == "direct" %}
 НДС: <b>{{vat|formatvalue}} {{currency}}</b>
 {% endif %}
 """ + equal_delimiter
