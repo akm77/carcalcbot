@@ -306,8 +306,15 @@ def get_message_text() -> str:
 Оборудование Эра-Глонасс: <b>{{gps|formatvalue}}</b> {{currency}} 
 Комиссия: <b>{{commission|formatvalue}}</b> {{currency}}
 """ + equal_delimiter
-    grand_total = "<b>ВСЕГО: {{grand_total|formatvalue}}</b> {{currency}}"
-    return header + customs_costs + customs_total + non_customs_costs + grand_total
+    grand_total = "<b>ВСЕГО: {{grand_total|formatvalue}}</b> {{currency}}\n"
+    footer = """\n<i>Уважаемые Господа, обращаем Ваше внимание, 
+что для всех расчетов в валюте, берутся курсы <b>ЦБ РФ</b>, 
+в связи с этим, итоговая фактическая стоимость авто 
+может отличаться от стоимости в калькуляторе.</i> 
+
+C уважением, команда <b>ВашАвто</b>    
+"""
+    return header + customs_costs + customs_total + non_customs_costs + grand_total + footer
 
 
 async def cost_calculation(config: Settings, db_session: async_sessionmaker,
