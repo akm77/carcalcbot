@@ -277,7 +277,7 @@ def get_message_text() -> str:
 {% endif %}
 Пошлина: <b>{{customs_duty|formatvalue}}</b> {{currency}} 
 {% if buyer_type_code == "entity" and freight_type == "direct" %}
-НДС: <b>{{vat|formatvalue}} {{currency}}</b>
+НДС: {{vat|formatvalue}} <b>{{currency}}</b>
 {% endif %}
 """ + equal_delimiter
     customs_total = "Итого: <b>{{customs_total|formatvalue}}</b> {{currency}}\n" + minus_delimiter
@@ -361,6 +361,7 @@ async def cost_calculation(config: Settings, db_session: async_sessionmaker,
                               customs_clearance_cost=customs_clearance_cost.quote_currency_value,
                               disposal_cost=disposal_cost.quote_currency_value if disposal_cost else None,
                               customs_duty=customs_duty.quote_currency_value,
+                              excise_cost=excise_cost.quote_currency_value if excise_cost else None,
                               vat=vat,
                               customs_total=customs_total,
                               commission=commission,
