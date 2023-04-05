@@ -10,7 +10,7 @@ from .whenable import is_legal_entity
 def select_country_kbd():
     return Group(
         Radio(
-            Format("✓ {item[0]}"),
+            Format("✅ {item[0]}"),
             Format("  {item[0]}"),
             id=constants.CalculatorForm.SELECT_COUNTRY,
             item_id_getter=operator.itemgetter(1),
@@ -40,7 +40,7 @@ def enter_engine_data():
 
 def select_fuel_type_kbd():
     return Radio(
-        Format("✓ {item[0]}"),
+        Format("✅ {item[0]}"),
         Format("  {item[0]}"),
         id=constants.CalculatorForm.SELECT_FUEL_TYPE,
         item_id_getter=operator.itemgetter(1),
@@ -52,7 +52,7 @@ def select_fuel_type_kbd():
 
 def select_unit_of_power_kbd():
     return Radio(
-        Format("✓ {item[0]}"),
+        Format("✅ {item[0]}"),
         Format("  {item[0]}"),
         id=constants.CalculatorForm.SELECT_UNIT_OF_POWER,
         item_id_getter=operator.itemgetter(1),
@@ -63,26 +63,26 @@ def select_unit_of_power_kbd():
 
 
 def select_sell_currency_price():
-    return Group(SwitchTo(Const("✍️ Цена"),
-                          id=constants.CalculatorForm.ENTER_PRICE,
-                          state=states.CalculatorStates.enter_price),
-                 Radio(
-                     Format("✓ {item[0]}"),
-                     Format("  {item[0]}"),
-                     id=constants.CalculatorForm.SELECT_SELL_CURRENCY,
-                     item_id_getter=operator.itemgetter(1),
-                     on_state_changed=events.on_sell_currency_changed,
-                     items="sell_currencies",
-                 ),
-                 width=3
+    return Group(Radio(
+        Format("✅ {item[0]}"),
+        Format("  {item[0]}"),
+        id=constants.CalculatorForm.SELECT_SELL_CURRENCY,
+        item_id_getter=operator.itemgetter(1),
+        on_state_changed=events.on_sell_currency_changed,
+        items="sell_currencies",
+    ),
+        SwitchTo(Const("✍️ Цена"),
+                 id=constants.CalculatorForm.ENTER_PRICE,
+                 state=states.CalculatorStates.enter_price),
+        width=3
 
-                 )
+    )
 
 
 def select_car_age_kbd():
     return Group(
         Radio(
-            Format("✓ {item[0]}"),
+            Format("✅ {item[0]}"),
             Format("  {item[0]}"),
             id=constants.CalculatorForm.SELECT_CAR_AGE,
             item_id_getter=operator.itemgetter(1),
@@ -96,7 +96,7 @@ def select_car_age_kbd():
 def select_buyer_type_kbd():
     return Row(
         Radio(
-            Format("✓ {item[0]}"),
+            Format("✅ {item[0]}"),
             Format("  {item[0]}"),
             id=constants.CalculatorForm.SELECT_BUYER_TYPE,
             item_id_getter=operator.itemgetter(1),
@@ -121,7 +121,7 @@ def calc_final_action_kbd():
 def select_freight_type_kbd():
     return Row(
         Radio(
-            Format("✓ {item[0]}"),
+            Format("✅ {item[0]}"),
             Format("  {item[0]}"),
             id=constants.CalculatorForm.SELECT_FREIGHT_TYPE,
             item_id_getter=operator.itemgetter(1),

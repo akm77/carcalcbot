@@ -4,7 +4,8 @@ from aiogram_dialog.widgets.common import ManagedWidget
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Select
 
-from . import states
+from . import states, constants
+from ...models.db_commands import get_country_currency
 from ...utils.decimals import check_digit_value
 
 
@@ -13,6 +14,10 @@ async def on_country_changed(event: ChatEvent, widget: ManagedWidget[Select], ma
     ctx.dialog_data.update(country_code=item_id)
     if item_id == "JP":
         ctx.dialog_data.update(freight_type="direct")
+    session = manager.middleware_data.get('db_session')
+    currency = await get_country_currency(session=session, country=item_id)
+    select_sell_currency_kbd = manager.find(constants.CalculatorForm.SELECT_SELL_CURRENCY)
+    await select_sell_currency_kbd.set_checked(item_id=currency.currency_iso_code_char)
 
 
 async def on_car_age_changed(event: ChatEvent, widget: ManagedWidget[Select], manager: DialogManager, item_id):

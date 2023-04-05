@@ -99,7 +99,7 @@ async def calculator_form(dialog_manager: DialogManager, **middleware_data):
     result = await get_last_pairs(session)
     currency_pairs = ""
     if len(result):
-        currency_pairs += f"Курсы вапют на <b>{result[0].timestamp: %d.%m.%Y}</b>\n"
+        currency_pairs += f"Курсы валют на <b>{result[0].timestamp: %d.%m.%Y}</b>\n"
         currency_pairs += "\n".join(
             [f"<code>{p.nominal:5d} {p.base_currency_code}/{p.quote_currency_code}</code> "
              f"{p.value}" for p in result])
